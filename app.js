@@ -59,20 +59,53 @@ function fillForm(b,n,p,u) {
     setTimeout(() => document.getElementById('p-name').focus(), 300);
 }
 
-function prepareAndPrint() {
+ffunction prepareAndPrint() {
     if(!printQueue.length) return;
-    
-    // Створюємо тимчасовий контейнер для друку, якщо його ще немає
-    let printArea = document.getElementById('print-area');
-    if (!printArea) {
-        printArea = document.createElement('div');
-        printArea.id = 'print-area';
-        document.body.appendChild(printArea);
-    }
-    
-    let htmlContent = '';
 
-    // Геруємо контент (по 18 штук на А4)
+    // Створюємо тимчасовий iframe для друку (якщо його немає)
+    let printIframe = document.getElementById('print-iframe');
+    if (!printIframe) {
+        printIframe = document.createElement('iframe');
+        printIframe.id = 'print-iframe';
+        printIframe.style.position = 'absolute';
+        printIframe.style.width = '0';
+        printIframe.style.height = '0';
+        printIframe.style.border = 'none';
+        document.body.appendChild(printIframe);
+    }
+
+    let htmlContent = `
+    <html>
+    <head>
+        <style>
+            * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+            @page { size: A4; margin: 0; }
+            body { background: #fff; width: 210mm; }
+            .page { 
+                width: 210mm; height: 290mm; padding: 8mm 6mm; 
+                display: flex; flex-wrap: wrap; align-content: flex-start; 
+                page-break-after: always; overflow: hidden; 
+            }
+            .price-tag { 
+                width: 66mm; height: 44mm; border: 0.3mm dashed #999; 
+                padding: 4mm; display: flex; flex-direction: column; 
+                justify-content: space-between; background: white; 
+            }
+            .tag-name { 
+                font-size: 13pt; font-weight: 800; text-transform: uppercase; 
+                height: 10mm; line-height: 1.1; display: -webkit-box; 
+                -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; 
+            }
+            .tag-body { display: flex; justify-content: space-between; align-items: flex-end; flex-grow: 1; margin-bottom: 1mm; }
+            .tag-old-val { font-size: 28pt; color: #1c1c1c; font-weight: bold; position: relative; margin-left: 10mm; }
+            .tag-old-val::after { content: ""; position: absolute; left: -10%; top: 50%; width: 120%; height: 1.5pt; background: #000; transform: rotate(-15deg); }
+            .tag-price-big { font-size: 42pt; font-weight: 900; line-height: 0.8; letter-spacing: -1pt; }
+            .tag-curr { font-size: 14pt; font-weight: bold; }
+            .tag-footer { border-top: 1.5pt solid #000; display: flex; justify-content: space-between; font-size: 8.5pt; font-weight: bold; padding-top: 1mm; }
+        </style>
+    </head>
+    <body>`;
+
     for (let i = 0; i < printQueue.length; i += 18) {
         const pageItems = printQueue.slice(i, i + 18);
         htmlContent += `<div class="page">`;
@@ -88,11 +121,25 @@ function prepareAndPrint() {
         htmlContent += `</div>`;
     }
 
-    printArea.innerHTML = htmlContent;
+    htmlContent += `</body></html>`;
 
-    // Запускаємо друк
-    window.print();
+    // Записуємо контент в iframe
+    const doc = printIframe.contentWindow.document;
+    doc.open();
+    doc.write(htmlContent);
+    doc.close();
+
+    // Викликаємо друк після завантаження контенту в iframe
+    printIframe.onload = function() {
+        setTimeout(() => {
+            printIframe.contentWindow.focus();
+            printIframe.contentWindow.print();
+        }, 500);
+    };
     
-    // Очищуємо після друку
-    printArea.innerHTML = '';
+    // Для Safari дублюємо виклик, якщо onload не спрацював миттєво
+    setTimeout(() => {
+        printIframe.contentWindow.focus();
+        printIframe.contentWindow.print();
+    }, 1000);
 }
