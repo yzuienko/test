@@ -61,22 +61,18 @@ function fillForm(b,n,p,u) {
 
 function prepareAndPrint() {
     if(!printQueue.length) return;
-    const win = window.open('', '_blank');
-    let htmlContent = `<html><head><style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        @page { size: A4; margin: 0; }
-        body { background: #fff; width: 210mm; margin: 0; padding: 0; font-family: sans-serif; }
-        .page { width: 210mm; height: 282mm; padding: 8mm 6mm; display: flex; flex-wrap: wrap; align-content: flex-start; page-break-after: always; overflow: hidden; }
-        .price-tag { width: 66mm; height: 44mm; border: 0.3mm dashed #999; padding: 4mm; display: flex; flex-direction: column; justify-content: space-between; background: white; }
-        .tag-name { font-size: 13pt; font-weight: 800; text-transform: uppercase; height: 10mm; line-height: 1.1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .tag-body { display: flex; justify-content: space-between; align-items: flex-end; flex-grow: 1; margin-bottom: 1mm; }
-        .tag-old-val { font-size: 28pt; color: #1c1c1c; font-weight: bold; position: relative; margin-left: 10mm; }
-        .tag-old-val::after { content: ""; position: absolute; left: -10%; top: 50%; width: 120%; height: 1.5pt; background: #000; transform: rotate(-15deg); }
-        .tag-price-big { font-size: 42pt; font-weight: 900; line-height: 0.8; letter-spacing: -1pt; }
-        .tag-curr { font-size: 14pt; font-weight: bold; }
-        .tag-footer { border-top: 1.5pt solid #000; display: flex; justify-content: space-between; font-size: 8.5pt; font-weight: bold; padding-top: 1mm; }
-    </style></head><body>`;
+    
+    // Створюємо тимчасовий контейнер для друку, якщо його ще немає
+    let printArea = document.getElementById('print-area');
+    if (!printArea) {
+        printArea = document.createElement('div');
+        printArea.id = 'print-area';
+        document.body.appendChild(printArea);
+    }
+    
+    let htmlContent = '';
 
+    // Геруємо контент (по 18 штук на А4)
     for (let i = 0; i < printQueue.length; i += 18) {
         const pageItems = printQueue.slice(i, i + 18);
         htmlContent += `<div class="page">`;
@@ -91,8 +87,12 @@ function prepareAndPrint() {
             </div>`).join('');
         htmlContent += `</div>`;
     }
-    htmlContent += `</body></html>`;
-    win.document.write(htmlContent);
-    win.document.close();
-    win.onload = () => { setTimeout(() => win.print(), 500); };
+
+    printArea.innerHTML = htmlContent;
+
+    // Запускаємо друк
+    window.print();
+    
+    // Очищуємо після друку
+    printArea.innerHTML = '';
 }
