@@ -26,3 +26,24 @@ input, select { width: 100%; padding: 14px; border: 1px solid #ddd; border-radiu
 .queue-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #f2f2f7; }
 
 @media print { .no-print { display: none; } }
+
+@media print {
+    /* Ховаємо весь інтерфейс додатка */
+    #main-ui, #api-status, #auth-overlay, .no-print {
+        display: none !important;
+    }
+    
+    /* Показуємо тільки зону з цінниками */
+    #print-area {
+        display: block !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+    
+    body { background: white; }
+}
+
+/* В звичайному режимі зону друку не видно */
+#print-area { display: none; }
