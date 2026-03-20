@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Smart Scan Pro v18.35</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SmartScan">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore-compat.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="api-status"></div>
+
+<div id="auth-overlay">
+    <div class="auth-card">
+        <h2 style="margin-top:0">SmartKasa Login</h2>
+        <input type="text" id="auth-phone" value="380639524091">
+        <input type="password" id="auth-pass" value="ivanka199902Bal">
+        <button class="btn btn-blue" onclick="initAudio(); loginSmartKasa()">УВІЙТИ</button>
+    </div>
+</div>
+
+<div class="no-print" id="main-ui" style="display:none;">
+    <div class="card">
+        <div id="scanner-wrapper">
+            <button class="torch-btn" onclick="toggleTorch()">🔦</button>
+            <div id="scan-info"></div>
+            <video id="video" playsinline></video>
+        </div>
+        <div class="scan-modes" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <button class="btn btn-blue" onclick="startScanner(false)">📷 ПОШУК</button>
+            <button class="btn btn-turbo" onclick="startScanner(true)">🚀 ТУРБО</button>
+        </div>
+        <div id="history-container" class="history-bar"></div>
+        <button id="stop-btn" class="btn" style="display:none; margin-top:10px; background:#eee;" onclick="resetScanner()">⏹ СТОП</button>
+    </div>
+
+    <div class="card">
+        <input type="text" id="p-barcode" placeholder="Штрихкод" inputmode="numeric">
+        <input type="text" id="p-name" placeholder="Назва товару" oninput="capitalizeInput(this)">
+        <div style="display: flex; gap: 8px;">
+            <input type="number" id="p-old-price" placeholder="Стара" style="flex:1" inputmode="numeric">
+            <input type="number" id="p-price" placeholder="Ціна" style="flex:1" inputmode="numeric">
+            <select id="p-unit" style="flex:0.7;">
+                <option value="-">-</option>
+                <option value="шт">шт</option>
+                <option value="кг">кг</option>
+                <option value="г">г</option>
+                <option value="л">л</option>
+            </select>
+        </div>
+        <button class="btn btn-green" onclick="addToQueue()">✅ В ЧЕРГУ</button>
+    </div>
+
+    <div class="card">
+        <h3>Черга: <span id="q-count">0</span></h3>
+        <div id="queue-list" style="max-height: 300px; overflow-y: auto;"></div>
+        <button class="btn btn-blue" style="background:#000; margin-top:10px;" onclick="prepareAndPrint()">🖨 ДРУК А4</button>
+    </div>
+</div>
+
+<script src="app.js"></script>
+<script src="auth.js"></script>
+<script src="scanner.js"></script>
+
+<script>
+    // Реєстрація Service Worker для PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+    }
+</script>
+
+</body>
+</html>
